@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Company Dashboard - Certificate Verification System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h2 class="mb-2">
+                        <i class="fas fa-building me-2"></i>{{ current_user.company_name }}
+                    </h2>
+                    <p class="mb-0">Search for candidates and verify their certificates using secure access codes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-cube fa-2x text-success mb-2"></i>
+                    <h5>{{ blockchain_stats.total_blocks }}</h5>
+                    <small class="text-muted">Total Blocks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-shield-check fa-2x text-info mb-2"></i>
+                    <h5>{% if blockchain_stats.integrity_valid %}Valid{% else %}Invalid{% endif %}</h5>
+                    <small class="text-muted">Blockchain Integrity</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h5>{% if blockchain_stats.latest_timestamp %}{{ blockchain_stats.latest_timestamp.strftime('%H:%M') }}{% else %}--:--{% endif %}</h5>
+                    <small class="text-muted">Latest Block</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Search Users Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Search Candidates
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('search_users') }}">
+                        <div class="mb-3">
+                            <label for="search_query" class="form-label">
+                                <i class="fas fa-user me-1"></i>Search by Name or Username
+                            </label>
+                            <input type="text" class="form-control" id="search_query" name="search_query" 
+                                   placeholder="Enter candidate's name or username" 
+                                   value="{{ search_query if search_query else '' }}" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </form>
+                    
+                    <!-- Search Results -->
+                    {% if search_query %}
+                        <hr>
+                        <h6 class="mb-3">Search Results for "{{ search_query }}":</h6>
+                        {% if users %}
+                            <div class="list-group">
+                                {% for user in users %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ user.full_name }}</h6>
+                                            <small class="text-muted">@{{ user.username }} • {{ user.email }}</small>
+                                            <br>
+                                            <small class="text-info">{{ user.certificates|length }} certificate(s)</small>
+                                        </div>
+                                        <span class="badge bg-secondary">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No candidates found matching "{{ search_query }}".
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Verify Certificate Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Verify Certificate
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('verify_certificate') }}">
+                        <div class="mb-3">
+                            <label for="access_code" class="form-label">
+                                <i class="fas fa-key me-1"></i>Access Code
+                            </label>
+                            <input type="text" class="form-control" id="access_code" name="access_code" 
+                                   placeholder="Enter 12-character access code" 
+                                   style="text-transform: uppercase;" maxlength="12" required>
+                            <div class="form-text">
+                                Enter the access code provided by the candidate to verify their certificate.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-shield-check me-2"></i>Verify Certificate
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- Quick Guide -->
+                    <div class="card bg-light">
+                        <div class="card-body p-3">
+                            <h6 class="card-title">
+                                <i class="fas fa-info-circle me-1"></i>How to Verify
+                            </h6>
+                            <ol class="card-text small mb-0">
+                                <li>Search for the candidate above</li>
+                                <li>Ask the candidate for their access code</li>
+                                <li>Enter the code to verify their certificate</li>
+                                <li>View and download the verified certificate</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blockchain Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-cube me-2"></i>Blockchain Information
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="text-primary">{{ blockchain_stats.total_blocks }}</h5>
+                                <small class="text-muted">Total Blocks</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="{% if blockchain_stats.integrity_valid %}text-success{% else %}text-danger{% endif %}">
+                                    {% if blockchain_stats.integrity_valid %}
+                                        <i class="fas fa-check-circle"></i> Valid
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i> Invalid
+                                    {% endif %}
+                                </h5>
+                                <small class="text-muted">Integrity Status</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                <small class="text-muted">Latest Block Hash:</small>
+                                <br>
+                                <code class="small">{{ blockchain_stats.latest_block_hash if blockchain_stats.latest_block_hash else 'No blocks yet' }}</code>
+                            </div>
+                            {% if blockchain_stats.latest_timestamp %}
+                            <div class="mt-2">
+                                <small class="text-muted">Last Updated:</small>
+                                <br>
+                                <small>{{ blockchain_stats.latest_timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+// Auto-uppercase access code input
+document.getElementById('access_code').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+// Format access code with dashes for better readability
+document.getElementById('access_code').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^A-Z0-9]/g, '');
+    
+    // Limit to 12 characters
+    if (value.length > 12) {
+        value = value.substring(0, 12);
+    }
+    
+    // Format as XXXX-XXXX-XXXX
+    let formatted = value.match(/.{1,4}/g)?.join('-') || value;
+    if (formatted !== e.target.value) {
+        e.target.value = formatted;
+    }
+});
+
+// Remove formatting on form submit
+document.querySelector('form[action="{{ url_for('verify_certificate') }}"]').addEventListener('submit', function() {
+    const accessCodeInput = document.getElementById('access_code');
+    accessCodeInput.value = accessCodeInput.value.replace(/-/g, '');
+});
+</script>
+{% endblock %}
+{% endblock %}

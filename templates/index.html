@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Certificate Verification System{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-shield-alt me-3"></i>
+                    Secure Certificate Verification
+                </h1>
+                <p class="lead mb-4">
+                    Store and verify certificates with blockchain technology. 
+                    Ensure authenticity and immutability of your important documents.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#user-portal" class="btn btn-light btn-lg">
+                        <i class="fas fa-user me-2"></i>User Portal
+                    </a>
+                    <a href="#company-portal" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-building me-2"></i>Company Portal
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-certificate display-1"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-5">Why Choose CertVerify?</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Secure Storage</h5>
+                    <p class="card-text">Your certificates are secured with SHA-256 hashing and stored on our blockchain.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-link fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Blockchain Verified</h5>
+                    <p class="card-text">Immutable blockchain records ensure your certificates cannot be tampered with.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-share-alt fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Easy Sharing</h5>
+                    <p class="card-text">Generate secure access codes to share your certificates with employers.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Portal Section -->
+    <div class="row mb-5" id="user-portal">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user me-2"></i>User Portal
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="card-text mb-4">
+                                Upload, store, and manage your certificates securely. Generate access codes 
+                                to share with companies for verification.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Upload PDF, JPG, PNG certificates</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Blockchain hash storage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Generate secure access codes</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Track certificate verifications</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('user_login') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </a>
+                                <a href="{{ url_for('user_register') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus me-2"></i>Register
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Portal Section -->
+    <div class="row mb-5" id="company-portal">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-building me-2"></i>Company Portal
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="card-text mb-4">
+                                Search for candidates and verify their certificates using secure access codes. 
+                                Ensure authenticity with blockchain verification.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Search candidates by name</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Verify certificates with access codes</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Blockchain integrity verification</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Download verified certificates</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('company_login') }}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </a>
+                                <a href="{{ url_for('company_register') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-building me-2"></i>Register Company
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-5">How It Works</h2>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fw-bold">1</span>
+                </div>
+                <h5>Upload Certificate</h5>
+                <p class="text-muted">Users upload their certificates to the platform</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fw-bold">2</span>
+                </div>
+                <h5>Blockchain Storage</h5>
+                <p class="text-muted">Certificate hash is stored on our blockchain</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fw-bold">3</span>
+                </div>
+                <h5>Generate Code</h5>
+                <p class="text-muted">User creates secure access code for sharing</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fw-bold">4</span>
+                </div>
+                <h5>Verify & Download</h5>
+                <p class="text-muted">Companies verify and access certificates</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

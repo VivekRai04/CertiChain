@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate Verification - {{ certificate.original_filename }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card {% if blockchain_verification.verified %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-header {% if blockchain_verification.verified %}bg-success{% else %}bg-danger{% endif %} text-white">
+                    <h3 class="mb-0">
+                        <i class="fas {% if blockchain_verification.verified %}fa-shield-check{% else %}fa-shield-alt{% endif %} me-2"></i>
+                        Certificate Verification
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="mb-2">{{ certificate.original_filename }}</h4>
+                            <p class="mb-1"><strong>Owner:</strong> {{ user.full_name }} (@{{ user.username }})</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                            <p class="mb-0"><strong>Access Code:</strong> <code>{{ access_code }}</code></p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            {% if blockchain_verification.verified %}
+                                <i class="fas fa-check-circle fa-4x text-success"></i>
+                                <h5 class="text-success mt-2">Verified</h5>
+                            {% else %}
+                                <i class="fas fa-times-circle fa-4x text-danger"></i>
+                                <h5 class="text-danger mt-2">Not Verified</h5>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Details -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Certificate Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td><strong>Original Filename:</strong></td>
+                                <td>{{ certificate.original_filename }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>File Type:</strong></td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ certificate.file_type.upper() }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>File Size:</strong></td>
+                                <td>{{ (certificate.file_size / 1024 / 1024)|round(2) }} MB</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Upload Date:</strong></td>
+                                <td>{{ certificate.uploaded_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>SHA-256 Hash:</strong></td>
+                                <td>
+                                    <code class="small">{{ certificate.file_hash }}</code>
+                                    <button class="btn btn-sm btn-outline-secondary ms-1" 
+                                            onclick="copyToClipboard('{{ certificate.file_hash }}')" 
+                                            title="Copy hash">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cube me-2"></i>Blockchain Verification
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if blockchain_verification.verified %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Verification Successful!</strong><br>
+                            This certificate's hash exists on the blockchain and is verified.
+                        </div>
+                        
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Block ID:</strong></td>
+                                    <td><span class="badge bg-primary">#{{ blockchain_verification.block_id }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Block Hash:</strong></td>
+                                    <td><code class="small">{{ blockchain_verification.block_hash[:32] }}...</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Block Timestamp:</strong></td>
+                                    <td>{{ blockchain_verification.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mining Nonce:</strong></td>
+                                    <td>{{ blockchain_verification.nonce }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Verification Failed!</strong><br>
+                            This certificate's hash could not be found on the blockchain.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Certificate Owner Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Full Name:</strong></td>
+                                        <td>{{ user.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Username:</strong></td>
+                                        <td>@{{ user.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td>{{ user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Member Since:</strong></td>
+                                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
+                                <p class="text-muted">Total Certificates: {{ user.certificates|length }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if blockchain_verification.verified %}
+                                <a href="{{ url_for('download_certificate', access_code=access_code) }}" 
+                                   class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-download me-2"></i>Download Certificate
+                                </a>
+                            {% else %}
+                                <button class="btn btn-secondary btn-lg w-100" disabled>
+                                    <i class="fas fa-download me-2"></i>Download Unavailable
+                                </button>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-info btn-lg w-100" onclick="printReport()">
+                                <i class="fas fa-print me-2"></i>Print Verification Report
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Important:</strong> This verification confirms that the certificate hash exists on our blockchain, 
+                                ensuring the document has not been tampered with since upload. The blockchain record serves as proof 
+                                of authenticity and timestamp.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+// Copy to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('Hash copied to clipboard!', 'success');
+    });
+}
+
+// Print report function
+function printReport() {
+    window.print();
+}
+
+// Toast notification function
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `<i class="fas fa-check me-2"></i>${message}`;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--bs-${type});
+        color: white;
+        padding: 12px 24px;
+        border-radius: 5px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media print {
+        .btn, .alert-info, .card-header {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #000 !important;
+            margin-bottom: 20px;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
+{% endblock %}

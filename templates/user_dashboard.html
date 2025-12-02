@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - Certificate Verification System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="mb-2">
+                        <i class="fas fa-user me-2"></i>Welcome, {{ current_user.full_name }}!
+                    </h2>
+                    <p class="mb-0">Manage your certificates and generate secure access codes for sharing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-certificate fa-2x text-primary mb-2"></i>
+                    <h5>{{ certificates|length }}</h5>
+                    <small class="text-muted">Certificates</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-cube fa-2x text-success mb-2"></i>
+                    <h5>{{ blockchain_stats.total_blocks }}</h5>
+                    <small class="text-muted">Blockchain Blocks</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-shield-check fa-2x text-info mb-2"></i>
+                    <h5>{% if blockchain_stats.integrity_valid %}Valid{% else %}Invalid{% endif %}</h5>
+                    <small class="text-muted">Blockchain Integrity</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-key fa-2x text-warning mb-2"></i>
+                    <h5>{{ certificates|selectattr('access_codes')|list|length }}</h5>
+                    <small class="text-muted">Active Codes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Certificate Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Upload New Certificate
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('upload_certificate') }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="certificate" class="form-label">Select Certificate File</label>
+                            <input type="file" class="form-control" id="certificate" name="certificate" 
+                                   accept=".pdf,.jpg,.jpeg,.png" required>
+                            <div class="form-text">
+                                Accepted formats: PDF, JPG, PNG. Maximum file size: 16MB.
+                            </div>
+                        </div>
+                        
+                        <div class="upload-area border border-dashed border-2 rounded p-4 text-center" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Drag and drop your certificate here, or click to select</p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>Upload Certificate
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificates List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-list me-2"></i>My Certificates
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if certificates %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-file me-1"></i>Certificate</th>
+                                        <th><i class="fas fa-hashtag me-1"></i>Hash</th>
+                                        <th><i class="fas fa-calendar me-1"></i>Uploaded</th>
+                                        <th><i class="fas fa-cube me-1"></i>Block</th>
+                                        <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cert in certificates %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ cert.original_filename }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ cert.file_type.upper() }} • {{ (cert.file_size / 1024 / 1024)|round(2) }} MB
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <code class="small">{{ cert.file_hash[:16] }}...</code>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" 
+                                                    onclick="copyToClipboard('{{ cert.file_hash }}')" 
+                                                    title="Copy full hash">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <small>{{ cert.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                        </td>
+                                        <td>
+                                            {% if cert.blockchain_block_id %}
+                                                <span class="badge bg-success">Block #{{ cert.blockchain_block_id }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('generate_access_code', cert_id=cert.id) }}" 
+                                                   class="btn btn-sm btn-primary" title="Generate Access Code">
+                                                    <i class="fas fa-key"></i>
+                                                </a>
+                                            </div>
+                                            
+                                            <!-- Show active access codes -->
+                                            {% set active_codes = cert.access_codes|selectattr('is_active')|list %}
+                                            {% if active_codes %}
+                                                <div class="mt-2">
+                                                    {% for code in active_codes %}
+                                                        {% if code.is_valid() %}
+                                                            <span class="badge bg-info me-1">{{ code.code }}</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No certificates uploaded yet</h5>
+                            <p class="text-muted">Upload your first certificate to get started with blockchain verification.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+// Copy hash to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success message
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = 'Hash copied to clipboard!';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bs-success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    });
+}
+
+// Drag and drop functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('certificate');
+    
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('border-primary');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('border-primary');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-primary');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileDisplay(files[0]);
+        }
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            updateFileDisplay(e.target.files[0]);
+        }
+    });
+    
+    function updateFileDisplay(file) {
+        uploadArea.innerHTML = `
+            <i class="fas fa-file-check fa-3x text-success mb-3"></i>
+            <p class="text-success"><strong>${file.name}</strong></p>
+            <p class="text-muted small">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+        `;
+    }
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
+{% endblock %}

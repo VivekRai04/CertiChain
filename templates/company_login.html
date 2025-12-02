@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Company Login - Certificate Verification System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-building me-2"></i>Company Login
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="company_name" class="form-label">
+                                <i class="fas fa-building me-1"></i>Company Name
+                            </label>
+                            <input type="text" class="form-control" id="company_name" name="company_name" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Password
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-2">Don't have a company account?</p>
+                        <a href="{{ url_for('company_register') }}" class="btn btn-outline-success">
+                            <i class="fas fa-building me-2"></i>Register Company
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('index') }}" class="text-muted">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
